@@ -10,6 +10,8 @@ import AllListingsScreen from './app/components/screens/AllListingsScreen.js';
 import ListingsScreen from './app/components/screens/ListingsScreen.js';
 import ProfileScreen from './app/components/screens/ProfileScreen.js';
 import CommunityScreen from './app/components/screens/CommunityScreen.js';
+import ProfileListingsScreen from './app/components/screens/ProfileListingsScreen.js';
+import ProfileCommunityScreen from './app/components/screens/ProfileCommunityScreen.js';
 
 import colors from './app/config/colors.js';
 
@@ -33,6 +35,28 @@ function HomepageScreenTabs() {
 	);
 }
 
+
+const ProfileTab = createBottomTabNavigator();
+
+function ProfileScreenTabs(){
+	return (
+		<ProfileTab.Navigator>
+				<ProfileTab.Screen options={{headerShown: false, 
+								tabBarIcon: ({ color, size }) => (
+									<MaterialCommunityIcons name="apps" color={colors.primary} size={35} />),
+								// tabBarLabelStyle: {color: colors.primary},
+								}} 
+						name="User Listings" component={ProfileListingsScreen} />
+			<ProfileTab.Screen options={{headerShown: false, 
+								tabBarIcon: ({ color, size }) => (
+									<MaterialCommunityIcons name="human-greeting" color={colors.primary} size={35} />
+								)}}
+						name="Community Posts" component={ProfileCommunityScreen} />
+		</ProfileTab.Navigator>
+	)
+}
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -43,7 +67,7 @@ export default function App() {
 				<Stack.Screen options={{headerShown:false}} name="Signup" component={SignupScreen} />
 				<Stack.Screen options={{headerShown:false}} name="Homepage" component={HomepageScreenTabs} />
 				<Stack.Screen options={{headerShown:false}} name="Listings" component={ListingsScreen} />
-				<Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
+				<Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreenTabs} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
