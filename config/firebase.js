@@ -1,18 +1,34 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import Constants from "expo-constants";
-// Firebase config
+import { initializeApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
+import messaging from '@react-native-firebase/messaging';
 
+
+
+// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyB06gBwn5TGuMxRvOaJqNP243Dx8s7Ypcw",
-  authDomain: "isklutter-44ba8.firebaseapp.com",
-  projectId: "isklutter-44ba8",
-  storageBucket: "isklutter-44ba8.appspot.com",
-  messagingSenderId: "143228769830",
-  appId: "1:143228769830:web:11afc342107ba446f0f8e7",
-  measurementId: "G-3Z2FB4TZS9"
+  apiKey: "AIzaSyAl1jm8q5onXVIwWQI-OVLxviw9lpda2-A",
+  authDomain: "isklutterfinal.firebaseapp.com",
+  projectId: "isklutterfinal",
+  storageBucket: "isklutterfinal.appspot.com",
+  messagingSenderId: "1099286368526",
+  appId: "1:1099286368526:web:1c8d4b34ae2c958b07875f",
+  measurementId: "G-0B2GX1SR93"
 };
-initializeApp(firebaseConfig);
-export const auth = getAuth();
-export const database = getFirestore();
+const app = initializeApp(firebaseConfig);
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
+const database = getFirestore(app);
+const storage = getStorage(app);
+
+const messagingInstance = messaging(); // Initialize messaging
+
+async function initializeFirebase() {
+  await messagingInstance.registerDeviceForRemoteMessages();
+  // Initialize other Firebase services if needed
+}
+
+export { app, auth, database, storage, messagingInstance as messaging };
