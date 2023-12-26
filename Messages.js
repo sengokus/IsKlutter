@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     VStack,
     HStack,
@@ -14,56 +14,71 @@ import {
 } from '@gluestack-ui/themed';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker'; 
 import SearchHeaderBack from '../components/SearchHeaderBack.js';
-import { useEffect } from 'react';
-import messaging from '@react-native-firebase/messaging';
-
+import { getFirestore, addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import colors from '../config/colors.js';
 import Routes from '../components/constants/Routes.js';
-import { addDoc, collection, getFirestore } from 'firebase/firestore'; // Import Firestore functions as needed
+import { FIREBASE_APP } from '../../config/firebase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 
-export default function MessagesPage({ user }) {
+const db = getFirestore(FIREBASE_APP);
+const auth = getAuth();
+
+export default function MessagesPage( { user } ) {
     const navigation = useNavigation();
-    const [listingDescription, setListingDescription] = useState('');
-    const [messageText, setMessageText] = useState('');
-    const [messages, setMessages] = useState([]);
+    const [usernames, setUsernames] = useState([]);
 
     useEffect(() => {
-        // Handle foreground messages
-        const unsubscribeForeground = messaging().onMessage(async (remoteMessage) => {
-            console.log('Foreground message received:', remoteMessage);
-            // Handle message data here
-        });
-
-        // Handle background messages
-        const unsubscribeBackground = messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            console.log('Background message received:', remoteMessage);
-            // Handle message data here
-        });
-
-        return () => {
-            unsubscribeForeground();
-            unsubscribeBackground();
+        const fetchAllUsernames = async () => {
+            try {
+                const userCollection = collection(db, 'users');
+                const querySnapshot = await getDocs(userCollection);
+    
+                const allUsernames = [];
+                querySnapshot.forEach((doc) => {
+                    allUsernames.push(doc.data().username);
+                });
+    
+                setUsernames(allUsernames); // Set usernames to state
+            } catch (error) {
+                console.error('Error fetching user data:', error.message);
+            }
         };
+    
+        fetchAllUsernames();
     }, []);
-
-    const sendButton = async () => {
-        try {
-        
-            await sendMessage({
-                description: listingDescription,
-                username: user.username, 
-                text: messageText,
-            });
-            // Clear input fields after posting
-            setListingDescription('');
-            setMessageText('');
-            Alert.alert('Message sent!');
-        } catch (error) {
-            console.error('Error sending message: ', error);
-        }
+    
+    
+    const renderUsernames = () => {
+        return usernames.map((username, index) => (
+            <Button key={index} onPress={() => handleUsernameClick(username)}>
+                <Text>{username}</Text>
+            </Button>
+        ));
     };
+    
+    const handleUsernameClick = (selectedUsername) => {
+        console.log("Selected username:", selectedUsername);
+    };
+
+
+    // Message data
+    const messages = [
+        { text: 'Hi', user: 'other' },
+        { text: 'Hello', user: 'me' },
+        { text: 'Hi', user: 'other' },
+        { text: 'Hello', user: 'me' },
+        { text: 'Hi', user: 'other' },
+        { text: 'Hello', user: 'me' },
+        { text: 'Hi', user: 'other' },
+        { text: 'Hello', user: 'me' },
+        { text: 'Hi', user: 'other' },
+        { text: 'This is an example of a very long message. I want to eat ice cream. I like rainbows. Hello, Sir Jayvee! Yay!', user: 'me' },
+    ];
+
+    
 
     const renderMessageBubbles = () => {
         // Map messages
@@ -71,16 +86,19 @@ export default function MessagesPage({ user }) {
             <Box
                 key={index}
                 bg={message.user === 'me' ? colors.secondary : colors.primary}
-                p={3}
-                m={2}
+                p="$3"
+                m="$2"
                 borderRadius={12}
                 alignSelf={message.user === 'me' ? 'flex-end' : 'flex-start'}
                 maxWidth="70%"
             >
-                <Text color={colors.white}>{message.text}</Text>
+                <Text color={message.user === 'me' ? colors.white : colors.white}>
+                    {message.text}
+                </Text>
             </Box>
         ));
     };
+
     return (
         <Box w="100%" h="100%" alignItems="center">
             <SearchHeaderBack userIcon={require("../../assets/img/usericon.jpg")} />
@@ -101,6 +119,7 @@ export default function MessagesPage({ user }) {
                 </ScrollView>
 
                 <Box p={20}>
+                       {renderUsernames()}
                     <HStack space="2xl" justifyContent="space-evenly">
                         <FormControl
                             borderRadius={10}
@@ -112,12 +131,7 @@ export default function MessagesPage({ user }) {
                             isRequired={false}
                         >
                             <Input w="auto" bg={colors.white}>
-                                <InputField t
-                                   multiline={true}
-                                   size="md"
-                                   placeholder="send a message..."
-                                   value={sendButton}
-                                   onChangeText={(text) => setsendButton(text)}/>
+                                <InputField type="text" defaultValue="" />
                             </Input>
                         </FormControl>
 
@@ -130,7 +144,7 @@ export default function MessagesPage({ user }) {
                             action="primary"
                             isDisabled={false}
                             isFocusVisible={false}
-                            onPress={send}
+                            onPress={() => Alert.alert("Alert", "This is a dummy action")}
                         >
                             <ButtonText>Send</ButtonText>
                         </Button>
