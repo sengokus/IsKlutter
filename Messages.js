@@ -14,7 +14,6 @@ import {
 } from '@gluestack-ui/themed';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker'; 
 import SearchHeaderBack from '../components/SearchHeaderBack.js';
 import { getFirestore, addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import colors from '../config/colors.js';
