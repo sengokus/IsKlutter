@@ -24,6 +24,8 @@ const auth = getAuth();
 export default function PostBox({ post, posterUser, posterIcon }) {
     const [listingDescription, setListingDescription] = useState('');
     const [username, setUsername] = useState('');
+    const [users, setUsers] = useState([]); // New state to store fetched users
+
   
     useEffect(() => {
       const fetchUserData = async () => {
@@ -70,6 +72,30 @@ export default function PostBox({ post, posterUser, posterIcon }) {
       }
     };
 
+    useEffect(() => {
+      const fetchForum = async () => {
+          try {
+              const forumCollection = collection(db, 'forum');
+              const querySnapshot = await getDocs(forumCollection);
+
+              const usersData = [];
+              querySnapshot.forEach((doc) => {
+                  const userData = {
+                      username: doc.data().username,
+                      description: doc.data().description // Assuming description is a field in your documents
+                  };
+                  usersData.push(userData);
+              });
+
+              setUsers(usersData); // Set user data to state
+          } catch (error) {
+              console.error('Error fetching user data:', error.message);
+          }
+      };
+
+      fetchForum();
+  }, []);
+
     return (
         <Box m={10}>
             <HStack space="lg" justifyContent="space-evenly" alignItems="center">
@@ -95,6 +121,7 @@ export default function PostBox({ post, posterUser, posterIcon }) {
                 >
                     <Text color={colors.white} fontSize="$sm">Post</Text>
                 </Button>
+                
             </HStack>
         </Box>
     );
